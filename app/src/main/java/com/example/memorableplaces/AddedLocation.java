@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.location.Address;
@@ -26,7 +27,9 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -131,6 +134,24 @@ public class AddedLocation extends FragmentActivity implements OnMapReadyCallbac
         places.add(address);
         locations.add(latLng);
         arrayAdapter.notifyDataSetChanged();
+        SharedPreferences sharedPreferences=this.getSharedPreferences("com.example.memorableplaces",Context.MODE_PRIVATE);
+
+        try {
+            ArrayList<String> latitudes= new ArrayList<>();
+            ArrayList<String> longitudes= new ArrayList<>();
+
+            for(LatLng coord:locations){
+                latitudes.add(Double.toString(coord.latitude));
+                longitudes.add(Double.toString(coord.longitude));
+            }
+            sharedPreferences.edit().putString("places",ObjectSerializer.serialize(places)).apply();
+            sharedPreferences.edit().putString("latitudes",ObjectSerializer.serialize(latitudes)).apply();
+            sharedPreferences.edit().putString("longitudes",ObjectSerializer.serialize(longitudes)).apply();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         Toast.makeText(this, "Location Added Successfully", Toast.LENGTH_SHORT).show();
 
         mMap.addMarker(new MarkerOptions().position(latLng).title(address).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
